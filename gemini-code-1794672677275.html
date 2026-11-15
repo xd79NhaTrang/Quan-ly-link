@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Quản Lý Link & Tài Liệu</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8fafc; margin: 0; padding: 6px; color: #333; display: flex; flex-direction: column; min-height: 100vh; }
+        .container { max-width: 950px; background: #fff; padding: 10px; margin: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); flex: 1; width: 100%; box-sizing: border-box; }
+        
+        .header-banner { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid #f1f5f9; padding-bottom: 6px; flex-wrap: wrap; gap: 6px; }
+        h2 { color: #0056b3; margin: 0; font-size: 16px; }
+        
+        .slogan-badge {
+            background: linear-gradient(135deg, #0284c7, #0056b3);
+            color: white; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,86,179,0.2);
+        }
+
+        .top-info-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; background: #f8fafc; padding: 8px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .right-control-panel { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: space-between; width: 100%; }
+        .action-buttons-group { display: flex; gap: 6px; align-items: center; }
+
+        .clock-container { display: flex; justify-content: center; }
+        .clock-circle {
+            width: 85px; height: 85px; background: linear-gradient(135deg, #0056b3, #0284c7); color: #fff;
+            border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 86, 179, 0.3); border: 3px solid #e0f2fe; text-align: center; padding: 4px; box-sizing: border-box;
+        }
+        .clock-time { font-size: 13px; font-weight: bold; }
+        .clock-date { font-size: 8px; margin-top: 2px; opacity: 0.95; line-height: 1.1; }
+
+        #modeSelector { text-align: center; padding: 25px 10px; }
+        .mode-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .btn-mode { padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer; color: white; display: inline-flex; align-items: center; gap: 6px; }
+        .btn-view-only { background: #0284c7; }
+        .btn-edit-mode { background: #10b981; }
+
+        #authModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .auth-box { background: #fff; padding: 20px; border-radius: 8px; width: 100%; max-width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; }
+        .auth-box input { margin: 15px 0; padding: 10px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
+        .auth-box button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .auth-error { color: #dc3545; font-size: 13px; margin-top: 5px; display: none; }
+
+        .btn-back-red { background: #dc3545; color: white; padding: 6px 10px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-link-click { background: #0284c7; color: white; padding: 4px 10px; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 11px; display: inline-block; }
+        .btn-link-click:hover { background: #0369a1; }
+
+        .section-box { background: #fafbfc; border: 1px solid #e1e4e8; padding: 10px; border-radius: 6px; margin-bottom: 10px; }
+        .form-group { margin-bottom: 8px; }
+        
+        label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 12px; color: #003366; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; font-family: Arial, sans-serif; }
+        
+        .table-scroll-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 4px; }
+        table { width: 100%; min-width: 500px; border-collapse: collapse; font-size: 12px; }
+        th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; vertical-align: middle !important; }
+        th { background-color: #0056b3; color: white; white-space: nowrap; }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        
+        .badge-secure { background: #fee2e2; color: #dc2626; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; margin-left: 6px; }
+        .badge-public { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; margin-left: 6px; }
+        
+        .edit-mode-banner { background: #fff3cd; color: #856404; padding: 6px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; display: none; text-align: center; border: 1px solid #ffeeba; font-size: 12px; }
+        .footer-phone { max-width: 950px; margin: 8px auto 0 auto; text-align: right; font-size: 11px; font-weight: bold; color: #0284c7; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-banner">
+        <h2>QUẢN LÝ LINK & TÀI LIỆU</h2>
+        <div class="slogan-badge">📱 An toàn & Tiện lợi 🚀</div>
+    </div>
+
+    <div class="top-info-bar">
+        <div class="right-control-panel">
+            <div id="actionPanel" class="action-buttons-group no-print" style="display: none;">
+                <button class="btn-back-red" onclick="quayLaiChonCheDo()">⬅ CHỌN LẠI CHẾ ĐỘ</button>
+                <button type="button" onclick="loadData()" style="background: #10b981; color: white; font-size: 11px; padding: 6px 10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">🔄 Làm mới</button>
+            </div>
+            <div class="clock-container">
+                <div class="clock-circle">
+                    <div class="clock-time" id="clockTime">00:00</div>
+                    <div class="clock-date" id="clockDate">Đang tải...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH CHỌN CHẾ ĐỘ -->
+    <div id="modeSelector" class="section-box">
+        <h3>Vui lòng chọn chế độ truy cập hệ thống:</h3>
+        <div class="mode-buttons">
+            <button class="btn-mode btn-view-only" onclick="chonCheDo('view')">👁️ Xem thông thường (Ẩn link bảo mật)</button>
+            <button class="btn-mode btn-edit-mode" onclick="yeuCauMatKhau()">✏️ Quản lý & Xem link bảo mật</button>
+        </div>
+    </div>
+
+    <!-- MẬT KHẨU -->
+    <div id="authModal">
+        <div class="auth-box">
+            <h3>🔐 Nhập Mật Khẩu Quản Lý</h3>
+            <input type="password" id="passwordInput" placeholder="Nhập mật khẩu..." onkeydown="if(event.key==='Enter') kiemTraMatKhau()">
+            <div id="authError" class="auth-error">❌ Mật khẩu không chính xác!</div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button type="button" onclick="kiemTraMatKhau()">Xác Nhận</button>
+                <button type="button" onclick="dongModal()" style="background: #6c757d;">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NỘI DUNG CHÍNH -->
+    <div id="mainContent" style="display: none;">
+        
+        <div style="text-align: right; margin-bottom: 6px;" class="no-print">
+            <a href="https://docs.google.com/spreadsheets/d/1GJ4t8SXLFga3MnoMXICjZpgQkadZKGlFKNT6yIw1yMU/edit" target="_blank" id="sheetLinkBtn" style="display: none; background: #107c41; color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 12px;">📊 Mở Google Sheet</a>
+        </div>
+
+        <!-- BẢNG DANH SÁCH LINK -->
+        <div class="section-box">
+            <div style="margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin: 0; color: #0369a1; font-size: 14px;">📋 Danh Sách Liên Kết</h3>
+                <span id="roleIndicator" style="font-size: 11px; font-weight: bold; color: #10b981;"></span>
+            </div>
+            <div class="table-scroll-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">STT</th>
+                            <th>Nội dung link</th>
+                            <th style="width: 90px; text-align: center;">Link</th>
+                            <th style="width: 80px; text-align: center;" class="col-action no-print" style="display: none;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="linkTableBody">
+                        <tr><td colspan="4" style="text-align: center;">Đang tải dữ liệu từ Google Sheets...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FORM THÊM / SỬA LINK -->
+        <div class="section-box no-print" id="formSection" style="display: none;">
+            <h3 id="formTitle" style="margin-top: 0; color: #003366; font-size: 14px;">➕ Thêm Link Mới</h3>
+            <div id="editBanner" class="edit-mode-banner">✏️ Đang chỉnh sửa bản ghi</div>
+            
+            <form id="formLink" onsubmit="event.preventDefault(); submitLink();">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>STT:</label>
+                    <input type="text" id="inputStt" placeholder="Ví dụ: 01, 02A, 99..." required>
+                </div>
+                <div class="form-group">
+                    <label>Nội dung link:</label>
+                    <input type="text" id="inputNoiDung" placeholder="Nhập tên mô tả link..." required>
+                </div>
+                <div class="form-group">
+                    <label>Đường dẫn (URL):</label>
+                    <input type="url" id="inputUrl" placeholder="https://..." required>
+                </div>
+                <div class="form-group">
+                    <label>Loại bảo mật:</label>
+                    <select id="inputLoai">
+                        <option value="public">🌐 Công khai (Ai cũng xem được)</option>
+                        <option value="secure">🔒 Bảo mật (Chỉ mình tôi xem được khi nhập mật khẩu)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-submit" style="background: #007bff; color: white; width: 100%; font-size: 14px; margin-top: 6px; padding: 9px; border-radius: 6px; font-weight: bold; border: none; cursor: pointer;">Lưu Liên Kết</button>
+                <button type="button" class="btn-cancel" id="cancelBtn" onclick="resetForm()" style="background: #6c757d; color: white; width: 100%; font-size: 12px; margin-top: 5px; padding: 7px; border-radius: 6px; border: none; cursor: pointer; display: none;">❌ Hủy chỉnh sửa</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer-phone">0948.017.180</div>
+
+<script>
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHdMzQH4_i3YkbKmTgUr3zVbaOke_50MQAgjxGezIhvZK9qqQuRu3OIVtKAS_loPj2SQ/exec";
+    const MAT_KHAU_QUAN_LY = "219168"; 
+
+    let currentMode = '';
+    let linkData = [];
+    let editingId = null;
+
+    window.onload = function() {
+        setInterval(() => {
+            const now = new Date();
+            document.getElementById('clockTime').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+            document.getElementById('clockDate').innerHTML = `${days[now.getDay()]}<br>${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth()+1).padStart(2, '0')}/${now.getFullYear()}`;
+        }, 1000);
+    };
+
+    function chonCheDo(mode) {
+        currentMode = mode;
+        document.getElementById('modeSelector').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('actionPanel').style.display = 'flex';
+
+        const actionHeaders = document.querySelectorAll('.col-action');
+        if (mode === 'view') {
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('sheetLinkBtn').style.display = 'none';
+            document.getElementById('roleIndicator').innerText = "👁️ Chế độ xem thông thường (Link bảo mật đã bị ẩn)";
+            actionHeaders.forEach(el => el.style.display = 'none');
+        } else {
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('sheetLinkBtn').style.display = 'inline-block';
+            document.getElementById('roleIndicator').innerText = "🔓 Chế độ quản lý (Hiển thị toàn bộ link bảo mật)";
+            actionHeaders.forEach(el => el.style.display = 'table-cell');
+        }
+        loadData();
+    }
+
+    function yeuCauMatKhau() { 
+        document.getElementById('authModal').style.display = 'flex'; 
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('authError').style.display = 'none';
+        document.getElementById('passwordInput').focus();
+    }
+
+    function dongModal() { document.getElementById('authModal').style.display = 'none'; }
+
+    function kiemTraMatKhau() {
+        if (document.getElementById('passwordInput').value === MAT_KHAU_QUAN_LY) { 
+            dongModal(); 
+            chonCheDo('edit'); 
+        } else { 
+            document.getElementById('authError').style.display = 'block'; 
+        }
+    }
+
+    function quayLaiChonCheDo() {
+        document.getElementById('mainContent').style.display = 'none';
+        document.getElementById('actionPanel').style.display = 'none';
+        document.getElementById('modeSelector').style.display = 'block';
+        resetForm();
+    }
+
+    function loadData() {
+        fetch(WEB_APP_URL)
+        .then(res => res.json())
+        .then(res => {
+            linkData = res.links || [];
+            renderTable();
+        }).catch(err => {
+            console.error(err);
+            document.getElementById('linkTableBody').innerHTML = `<tr><td colspan="4" style="text-align:center; color: red;">Lỗi tải dữ liệu từ Google Sheets!</td></tr>`;
+        });
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('linkTableBody');
+        tbody.innerHTML = "";
+
+        let displayList = linkData;
+        if (currentMode === 'view') {
+            displayList = linkData.filter(item => item.loai !== 'secure');
+        }
+
+        if (displayList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #777;">Chưa có dữ liệu.</td></tr>`;
+            return;
+        }
+
+        displayList.forEach((item, idx) => {
+            let badgeHtml = item.loai === 'secure' ? `<span class="badge-secure">🔒 Bảo mật</span>` : `<span class="badge-public">🌐 Công khai</span>`;
+            let linkHtml = `<a href="${item.url}" target="_blank" class="btn-link-click">click</a>`;
+            
+            let actionHtml = '';
+            if (currentMode === 'edit') {
+                actionHtml = `
+                    <td style="text-align:center;" class="col-action">
+                        <button onclick="editItem(${idx})" style="background:#f59e0b; color:#fff; font-size:10px; padding:3px 6px; border-radius:4px; border:none; cursor:pointer; margin-bottom:2px;">✏️ Sửa</button>
+                        <button onclick="deleteItem('${item.stt}')" style="background:#dc3545; color:#fff; font-size:10px; padding:3px 6px; border-radius:4px; border:none; cursor:pointer;">🗑️ Xóa</button>
+                    </td>
+                `;
+            }
+
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="text-align:center; font-weight:bold;">${item.stt}</td>
+                <td>
+                    <div style="font-weight: bold; color: ${item.loai === 'secure' ? '#dc2626' : '#1e293b'};">
+                        ${item.noiDung} ${currentMode === 'edit' ? badgeHtml : ''}
+                    </div>
+                </td>
+                <td style="text-align:center;">${linkHtml}</td>
+                ${currentMode === 'edit' ? actionHtml : ''}
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function submitLink() {
+        const payload = {
+            action: editingId !== null ? "edit" : "add",
+            id: editingId,
+            stt: document.getElementById('inputStt').value,
+            noiDung: document.getElementById('inputNoiDung').value,
+            url: document.getElementById('inputUrl').value,
+            loai: document.getElementById('inputLoai').value
+        };
+
+        fetch(WEB_APP_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify(payload) 
+        })
+        .then(() => {
+            alert("Thành công!");
+            resetForm();
+            setTimeout(loadData, 1200);
+        });
+    }
+
+    function editItem(idx) {
+        const item = linkData[idx];
+        editingId = item.id;
+        document.getElementById('editId').value = item.id;
+        document.getElementById('inputStt').value = item.stt;
+        document.getElementById('inputNoiDung').value = item.noiDung;
+        document.getElementById('inputUrl').value = item.url;
+        document.getElementById('inputLoai').value = item.loai || 'public';
+
+        document.getElementById('formTitle').innerText = "✏️ Cập Nhật Liên Kết";
+        document.getElementById('editBanner').style.display = 'block';
+        document.getElementById('cancelBtn').style.display = 'block';
+        document.getElementById('formSection').scrollIntoView({behavior:'smooth'});
+    }
+
+    function deleteItem(stt) {
+        if (confirm("Bạn có chắc chắn muốn xóa liên kết này không?")) {
+            fetch(WEB_APP_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ action: 'delete', stt: stt }) 
+            })
+            .then(() => setTimeout(loadData, 1200));
+        }
+    }
+
+    function resetForm() {
+        editingId = null;
+        document.getElementById('formLink').reset();
+        document.getElementById('formTitle').innerText = "➕ Thêm Link Mới";
+        document.getElementById('editBanner').style.display = 'none';
+        document.getElementById('cancelBtn').style.display = 'none';
+    }
+</script>
+
+</body>
+</html>
