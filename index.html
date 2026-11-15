@@ -36,10 +36,10 @@
         .btn-view-only { background: #0284c7; }
         .btn-edit-mode { background: #10b981; }
 
-        #authModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
-        .auth-box { background: #fff; padding: 20px; border-radius: 8px; width: 100%; max-width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; }
+        #authModal, #updateModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; box-sizing: border-box; }
+        .auth-box, .update-box { background: #fff; padding: 20px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: left; }
         .auth-box input { margin: 15px 0; padding: 10px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 6px; }
-        .auth-box button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .auth-box button, .update-box button { padding: 10px; background: #28a745; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
         .auth-error { color: #dc3545; font-size: 13px; margin-top: 5px; display: none; }
 
         .btn-back-red { background: #dc3545; color: white; padding: 6px 10px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
@@ -62,7 +62,12 @@
         .badge-public { background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; display: inline-block; margin-left: 6px; }
         
         .edit-mode-banner { background: #fff3cd; color: #856404; padding: 6px; border-radius: 6px; margin-bottom: 8px; font-weight: bold; display: none; text-align: center; border: 1px solid #ffeeba; font-size: 12px; }
-        .footer-phone { max-width: 950px; margin: 8px auto 0 auto; text-align: right; font-size: 11px; font-weight: bold; color: #0284c7; }
+        
+        .footer-area { max-width: 950px; margin: 8px auto 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .footer-phone { font-size: 11px; font-weight: bold; color: #0284c7; display: flex; align-items: center; gap: 8px; }
+        .btn-zalo { background: #0068ff; color: white; padding: 3px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-decoration: none; display: inline-flex; align-items: center; gap: 3px; }
+        .btn-zalo:hover { background: #0052cc; }
+        .btn-update-footer { background: #6366f1; color: white; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; border: none; cursor: pointer; display: none; }
     </style>
 </head>
 <body>
@@ -70,13 +75,13 @@
 <div class="container">
     <div class="header-banner">
         <h2>QUẢN LÝ LINK & TÀI LIỆU</h2>
-        <div class="slogan-badge">📱 An toàn & Tiện lợi 🚀</div>
+        <div class="slogan-badge">🚀 QUẢN LÝ SỐ 📱</div>
     </div>
 
     <div class="top-info-bar">
         <div class="right-control-panel">
             <div id="actionPanel" class="action-buttons-group no-print" style="display: none;">
-                <button class="btn-back-red" onclick="quayLaiChonCheDo()">⬅ CHỌN LẠI CHẾ ĐỘ</button>
+                <button class="btn-back-red" onclick="quayLaiTrangChu()">⬅ QUAY LẠI TRANG CHỦ</button>
                 <button type="button" onclick="loadData()" style="background: #10b981; color: white; font-size: 11px; padding: 6px 10px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">🔄 Làm mới</button>
             </div>
             <div class="clock-container">
@@ -88,12 +93,12 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH CHỌN CHẾ ĐỘ -->
+    <!-- MÀN HÌNH CHỌN CHẾ ĐỘ (TRANG CHỦ) -->
     <div id="modeSelector" class="section-box">
         <h3>Vui lòng chọn chế độ truy cập hệ thống:</h3>
         <div class="mode-buttons">
-            <button class="btn-mode btn-view-only" onclick="chonCheDo('view')">👁️ Xem thông thường (Ẩn link bảo mật)</button>
-            <button class="btn-mode btn-edit-mode" onclick="yeuCauMatKhau()">✏️ Quản lý & Xem link bảo mật</button>
+            <button class="btn-mode btn-view-only" onclick="chonCheDo('view')">👁️ Xem link</button>
+            <button class="btn-mode btn-edit-mode" onclick="yeuCauMatKhau()">✏️ Xem link và edit</button>
         </div>
     </div>
 
@@ -106,6 +111,24 @@
             <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button type="button" onclick="kiemTraMatKhau()">Xác Nhận</button>
                 <button type="button" onclick="dongModal()" style="background: #6c757d;">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL HƯỚNG DẪN CẬP NHẬT HTML TRÊN GITHUB -->
+    <div id="updateModal">
+        <div class="update-box">
+            <h3 style="color: #003366; margin-top: 0;">📖 Hướng Dẫn Cập Nhật HTML Lên GitHub</h3>
+            <ol style="font-size: 12px; padding-left: 20px; line-height: 1.5; color: #333;">
+                <li>Mở kho chứa dự án của anh trên GitHub: <br><b><a href="https://github.com/xd79NhaTrang/Quan-ly-link" target="_blank">github.com/xd79NhaTrang/Quan-ly-link</a></b></li>
+                <li>Bấm vào file <b>index.html</b> trong danh sách kho.</li>
+                <li>Bấm vào biểu tượng cây bút (<b style="color:#d97706;">Edit this file</b>) ở góc trên bên phải nội dung file.</li>
+                <li>Xóa toàn bộ code cũ đi, sau đó copy toàn bộ code HTML mới dán đè vào.</li>
+                <li>Cuộn xuống dưới cùng, bấm nút xanh lá <b>Commit changes...</b> để lưu lại.</li>
+                <li>Đợi 30 giây là trang web trực tuyến tự động cập nhật phiên bản mới nhất!</li>
+            </ol>
+            <div style="text-align: right; margin-top: 15px;">
+                <button type="button" onclick="dongHuongDan()" style="background: #6c757d; width: 100px;">Đóng</button>
             </div>
         </div>
     </div>
@@ -175,7 +198,14 @@
     </div>
 </div>
 
-<div class="footer-phone">0948.017.180</div>
+<div class="footer-area">
+    <div></div>
+    <div class="footer-phone">
+        <span>0948.017.180</span>
+        <a href="https://zalo.me/0948017180" target="_blank" class="btn-zalo">💬 LH Zalo</a>
+        <button type="button" id="updateHtmlBtn" class="btn-update-footer" onclick="moHuongDanCapNhat()">📥 Cập nhật HTML</button>
+    </div>
+</div>
 
 <script>
     const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyHdMzQH4_i3YkbKmTgUr3zVbaOke_50MQAgjxGezIhvZK9qqQuRu3OIVtKAS_loPj2SQ/exec";
@@ -201,16 +231,20 @@
         document.getElementById('actionPanel').style.display = 'flex';
 
         const actionHeaders = document.querySelectorAll('.col-action');
+        const updateBtn = document.getElementById('updateHtmlBtn');
+
         if (mode === 'view') {
             document.getElementById('formSection').style.display = 'none';
             document.getElementById('sheetLinkBtn').style.display = 'none';
-            document.getElementById('roleIndicator').innerText = "👁️ Chế độ xem thông thường (Link bảo mật đã bị ẩn)";
+            document.getElementById('roleIndicator').innerText = "👁️ Chế độ xem link (Link bảo mật đã bị ẩn)";
             actionHeaders.forEach(el => el.style.display = 'none');
+            updateBtn.style.display = 'none';
         } else {
             document.getElementById('formSection').style.display = 'block';
             document.getElementById('sheetLinkBtn').style.display = 'inline-block';
-            document.getElementById('roleIndicator').innerText = "🔓 Chế độ quản lý (Hiển thị toàn bộ link bảo mật)";
+            document.getElementById('roleIndicator').innerText = "🔓 Chế độ xem link và edit (Hiển thị toàn bộ link bảo mật)";
             actionHeaders.forEach(el => el.style.display = 'table-cell');
+            updateBtn.style.display = 'inline-block';
         }
         loadData();
     }
@@ -224,6 +258,9 @@
 
     function dongModal() { document.getElementById('authModal').style.display = 'none'; }
 
+    function moHuongDanCapNhat() { document.getElementById('updateModal').style.display = 'flex'; }
+    function dongHuongDan() { document.getElementById('updateModal').style.display = 'none'; }
+
     function kiemTraMatKhau() {
         if (document.getElementById('passwordInput').value === MAT_KHAU_QUAN_LY) { 
             dongModal(); 
@@ -233,7 +270,7 @@
         }
     }
 
-    function quayLaiChonCheDo() {
+    function quayLaiTrangChu() {
         document.getElementById('mainContent').style.display = 'none';
         document.getElementById('actionPanel').style.display = 'none';
         document.getElementById('modeSelector').style.display = 'block';
